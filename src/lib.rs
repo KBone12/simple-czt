@@ -23,20 +23,21 @@ pub fn czt<T: CZTnum>(
     w: Complex<T>,
     a: Complex<T>,
 ) {
-    let mut r = vec![Complex::zero(); input.len()];
+    let max = usize::max(input.len(), output.len());
+    let ws: Vec<_> = (0..max)
+        .map(|k| w.powf(T::from_f64((k * k) as f64 / 2.0).unwrap()))
+        .collect();
+    let iws: Vec<_> = (0..max)
+        .map(|k| w.powf(T::from_f64((k * k) as f64 / -2.0).unwrap()))
+        .collect();
+    let r = iws[0..input.len()].to_vec();
+    let c = iws[0..output.len()].to_vec();
     for k in 0..input.len() {
-        input[k] = w.powf(FromPrimitive::from_f64((k * k) as f64 / 2.0).unwrap())
-            * a.powi(-(k as i32))
-            * input[k];
-        r[k] = w.powf(FromPrimitive::from_f64((k * k) as f64 / -2.0).unwrap());
-    }
-    let mut c = vec![Complex::zero(); output.len()];
-    for k in 0..output.len() {
-        c[k] = w.powf(FromPrimitive::from_f64((k * k) as f64 / -2.0).unwrap());
+        input[k] = ws[k] * a.powi(-(k as i32)) * input[k];
     }
     toeplitz_multiply_embedded(&r, &c, input, output);
     for k in 0..output.len() {
-        output[k] = w.powf(FromPrimitive::from_f64((k * k) as f64 / 2.0).unwrap()) * output[k];
+        output[k] = ws[k] * output[k];
     }
 }
 
