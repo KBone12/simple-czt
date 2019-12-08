@@ -55,52 +55,45 @@ pub fn iczt<T: CZTnum>(
         output.len(),
         "The output length should equal to the input length."
     );
-    for k in 0..output.len() {
-        output[k] = w.powf(FromPrimitive::from_f64((k * k) as f64 / -2.0).unwrap()) * input[k];
+    let n = output.len();
+    for k in 0..n {
+        output[k] = w.powf(T::from_f64((k * k) as f64 / -2.0).unwrap()) * input[k];
     }
-    let mut p: Vec<Complex<T>> = vec![Complex::zero(); output.len()];
+    let mut p: Vec<Complex<T>> = vec![Complex::zero(); n];
     p[0] = Complex::one();
-    for k in 1..p.len() {
-        p[k] = p[k - 1] * (w.powf(FromPrimitive::from_usize(k).unwrap()) - Complex::one());
+    for k in 1..n {
+        p[k] = p[k - 1] * (w.powf(T::from_usize(k).unwrap()) - Complex::one());
     }
-    let mut u: Vec<Complex<T>> = vec![Complex::zero(); output.len()];
-    for k in 0..u.len() as isize {
+    let mut u: Vec<Complex<T>> = vec![Complex::zero(); n];
+    for k in 0..n as isize {
+        let n = n as isize;
         u[k as usize] = (-Complex::<T>::one()).powu(k as u32)
             * w.powf(
-                FromPrimitive::from_f64(
-                    (2 * k * k - (2 * u.len() as isize - 1) * k
-                        + u.len() as isize * (u.len() as isize - 1)) as f64
-                        / 2.0,
-                )
-                .unwrap(),
+                T::from_f64((2 * k * k - (2 * n - 1) * k + n * (n - 1)) as f64 / 2.0).unwrap(),
             )
-            / (p[u.len() - k as usize - 1] * p[k as usize]);
+            / (p[(n - k - 1) as usize] * p[k as usize]);
     }
-    let z: Vec<Complex<T>> = vec![Complex::zero(); output.len()];
+    let z: Vec<Complex<T>> = vec![Complex::zero(); n];
     let u_hat: Vec<_> = [
         vec![Complex::zero()],
         u.iter().skip(1).copied().rev().collect(),
     ]
     .concat()
     .to_vec();
-    let mut u_tilde: Vec<Complex<T>> = vec![Complex::zero(); output.len()];
+    let mut u_tilde: Vec<Complex<T>> = vec![Complex::zero(); n];
     u_tilde[0] = u[0];
-    let mut x1 = vec![Complex::zero(); output.len()];
-    let output_vec = output.to_vec();
-    toeplitz_multiply_embedded(&u_hat, &z, &mut output_vec.clone(), &mut x1);
-    let mut x2 = vec![Complex::zero(); output.len()];
-    toeplitz_multiply_embedded(&z, &u_hat, &mut x1, &mut x2);
-    let mut x3 = vec![Complex::zero(); output.len()];
-    toeplitz_multiply_embedded(&u, &u_tilde, &mut output_vec.clone(), &mut x3);
-    let mut x4 = vec![Complex::zero(); output.len()];
-    toeplitz_multiply_embedded(&u_tilde, &u, &mut x3, &mut x4);
-    for k in 0..output.len() {
-        output[k] = (x4[k] - x2[k]) / u[0];
-    }
-    for k in 0..output.len() {
+    let mut x1 = vec![Complex::zero(); n];
+    toeplitz_multiply_embedded(&u_hat, &z, output, &mut x1);
+    let mut x2 = vec![Complex::zero(); n];
+    toeplitz_multiply_embedded(&z, &u_hat, &x1, &mut x2);
+    let mut x3 = vec![Complex::zero(); n];
+    toeplitz_multiply_embedded(&u, &u_tilde, output, &mut x1);
+    toeplitz_multiply_embedded(&u_tilde, &u, &x1, &mut x3);
+    for k in 0..n {
         output[k] = a.powu(k as u32)
             * w.powf(FromPrimitive::from_f64((k * k) as f64 / -2.0).unwrap())
-            * output[k];
+            * (x3[k] - x2[k])
+            / u[0];
     }
 }
 
