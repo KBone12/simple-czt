@@ -1,6 +1,6 @@
 [package]
 name = "simple-czt"
-version = "0.2.3"
+version = "1.0.0"
 authors = ["kbone <kbonehobby@gmail.com>"]
 edition = "2018"
 

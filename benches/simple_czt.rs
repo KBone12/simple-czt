@@ -82,6 +82,11 @@ fn fft_n_10000(b: &mut Bencher) {
 }
 
 #[bench]
+fn fft_n_10007(b: &mut Bencher) {
+    bench_fft(10007, b);
+}
+
+#[bench]
 fn czt_n_10(b: &mut Bencher) {
     bench_czt(10, b);
 }
@@ -102,6 +107,11 @@ fn czt_n_10000(b: &mut Bencher) {
 }
 
 #[bench]
+fn czt_n_10007(b: &mut Bencher) {
+    bench_czt(10007, b);
+}
+
+#[bench]
 fn iczt_n_10(b: &mut Bencher) {
     bench_iczt(10, b);
 }
@@ -119,4 +129,9 @@ fn iczt_n_1000(b: &mut Bencher) {
 #[bench]
 fn iczt_n_10000(b: &mut Bencher) {
     bench_iczt(10000, b);
+}
+
+#[bench]
+fn iczt_n_10007(b: &mut Bencher) {
+    bench_iczt(10007, b);
 }

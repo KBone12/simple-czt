@@ -136,13 +136,7 @@ fn circulant_multiply<T: CZTnum>(
     let mut y_in = c_out
         .into_iter()
         .zip(x_out.into_iter())
-        .map(|(cc, xx)| cc * xx)
-        .map(|cc| {
-            Complex::new(
-                cc.re / FromPrimitive::from_usize(n).unwrap(),
-                cc.im / FromPrimitive::from_usize(n).unwrap(),
-            )
-        })
+        .map(|(cc, xx)| cc * xx / T::from_usize(n).unwrap())
         .collect::<Vec<_>>();
     let ifft = FFTplanner::new(true).plan_fft(y_in.len());
     ifft.process(&mut y_in, output);
